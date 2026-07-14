@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { products } from './data/products';
+import { products, loadImage, fallbackImage } from './data/products';
 import portadaGorras from './assets/products/gorras/Portadagorras.png';
 import portadaPantalones from './assets/products/pantalones/Portadapantalones.png';
 import portadaCamisas from './assets/products/camisas/Portadacamisas.png';
@@ -15,7 +15,7 @@ function ProductCard({ product, addToCart }) {
   return (
     <article className="product-card fade-up">
       <Link className="product-link" to={`/product/${product.id}`}>
-        <img src={product.image} alt={product.name} />
+        <ProductImage image={product.image} alt={product.name} />
         <div className="product-copy">
           {!['gorras', 'pantalones', 'camisas'].includes(product.category) && (
             <div className="tag-row">
@@ -38,6 +38,28 @@ function ProductCard({ product, addToCart }) {
       </div>
     </article>
   );
+}
+
+function ProductImage({ image, alt, className }) {
+  const [src, setSrc] = useState('');
+
+  useEffect(() => {
+    let mounted = true;
+    if (!image) return;
+    if (typeof image === 'string') {
+      setSrc(image);
+      return;
+    }
+    const { file, category } = image;
+    loadImage(category, file).then((url) => {
+      if (!mounted) return;
+      setSrc(url || fallbackImage);
+    });
+    return () => { mounted = false; };
+  }, [image]);
+
+  if (!src) return <div className={`img-placeholder ${className || ''}`} aria-hidden />;
+  return <img src={src} alt={alt} className={className} loading="lazy" />;
 }
 
 function MobileCartSummary({ totalItems, totalPrice }) {
@@ -253,8 +275,7 @@ function LandingPage() {
   return (
     <section className="launch-hero">
       <div className={`launch-screen fade-up ${isEntering ? 'exiting' : ''}`}>
-        <Link className="launch-title" to="/home" onClick={handleEnter}>LUXURY WORLD PREMIUM</Link>
-        <p className="launch-subtitle">Drop Urban Premium en 24 horas</p>
+        <h1 className="launch-title">LUXURY WORLD PREMIUM</h1>
         <div className="launch-countdown simple-countdown">
           <div>
             <strong>{timeLeft.hours}</strong>
@@ -269,6 +290,7 @@ function LandingPage() {
             <span>Segundos</span>
           </div>
         </div>
+        <button className="launch-cta" onClick={handleEnter}>Comprar ahora · Drop disponible</button>
       </div>
     </section>
   );
@@ -354,21 +376,21 @@ function Home({ addToCart }) {
         </div>
         <div className="category-grid">
           <Link className="category-card fade-up delay-1" to="/gorras">
-            <img src={portadaGorras} alt="Gorras modernas" />
+            <img src={portadaGorras} alt="Gorras modernas" loading="lazy" />
             <div>
               <h3>Gorras</h3>
               <p>Caps premium con actitud de calle.</p>
             </div>
           </Link>
           <Link className="category-card fade-up delay-2" to="/pantalones">
-            <img src={portadaPantalones} alt="Pantalones modernos" />
+            <img src={portadaPantalones} alt="Pantalones modernos" loading="lazy" />
             <div>
               <h3>Pantalones</h3>
               <p>Cortes refinados y confort de lujo.</p>
             </div>
           </Link>
           <Link className="category-card fade-up delay-3" to="/camisas">
-            <img src={portadaCamisas} alt="Camisas modernas" />
+            <img src={portadaCamisas} alt="Camisas modernas" loading="lazy" />
             <div>
               <h3>Camisas</h3>
               <p>Silk, linen y estructura de editorial.</p>
@@ -608,7 +630,7 @@ function ProductDetail({ addToCart }) {
           </div>
         </div>
         <div className="detail-image">
-          <img src={product.image} alt={product.name} />
+          <ProductImage image={product.image} alt={product.name} />
         </div>
       </div>
 
@@ -671,7 +693,7 @@ function CartPage({ cart, products, totalPrice, updateQuantity, clearCart }) {
               if (!product) return null;
               return (
                 <article className="cart-item fade-up" key={entry.id}>
-                  <img src={product.image} alt={product.name} />
+                  <ProductImage image={product.image} alt={product.name} />
                   <div>
                     <h3>{product.name}</h3>
                     <p>{product.description}</p>
