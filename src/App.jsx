@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, Route, Routes, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { products } from './data/products';
+import portadaGorras from './assets/products/gorras/Portadagorras.png';
+import portadaPantalones from './assets/products/pantalones/Portadapantalones.png';
+import portadaCamisas from './assets/products/camisas/Portadacamisas.png';
+import premiumImage from './assets/products/Premium.png';
 
 const currency = new Intl.NumberFormat('es-ES', {
   style: 'currency',
@@ -350,21 +354,21 @@ function Home({ addToCart }) {
         </div>
         <div className="category-grid">
           <Link className="category-card fade-up delay-1" to="/gorras">
-            <img src="/src/assets/products/gorras/Portadagorras.png" alt="Gorras modernas" />
+            <img src={portadaGorras} alt="Gorras modernas" />
             <div>
               <h3>Gorras</h3>
               <p>Caps premium con actitud de calle.</p>
             </div>
           </Link>
           <Link className="category-card fade-up delay-2" to="/pantalones">
-            <img src="/src/assets/products/pantalones/Portadapantalones.png" alt="Pantalones modernos" />
+            <img src={portadaPantalones} alt="Pantalones modernos" />
             <div>
               <h3>Pantalones</h3>
               <p>Cortes refinados y confort de lujo.</p>
             </div>
           </Link>
           <Link className="category-card fade-up delay-3" to="/camisas">
-            <img src="/src/assets/products/camisas/Portadacamisas.png" alt="Camisas modernas" />
+            <img src={portadaCamisas} alt="Camisas modernas" />
             <div>
               <h3>Camisas</h3>
               <p>Silk, linen y estructura de editorial.</p>
@@ -395,7 +399,7 @@ function Home({ addToCart }) {
           </div>
           <div
             className="exclusive-image"
-            style={{ backgroundImage: "url('/src/assets/products/Premium.png')" }}
+            style={{ backgroundImage: `url(${premiumImage})` }}
           />
         </div>
       </section>
