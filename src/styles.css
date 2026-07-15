@@ -52,6 +52,213 @@ img {
   max-width: 100%;
 }
 
+.discount-banner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(330px, 1fr);
+  gap: 2.4rem;
+  padding: 2rem;
+  margin: 4rem 0 5rem;
+  border-radius: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.18);
+}
+
+.discount-collage {
+  display: grid;
+  grid-template-columns: 1.2fr 0.9fr;
+  grid-template-rows: repeat(2, minmax(160px, 1fr));
+  gap: 1rem;
+  min-height: 420px;
+}
+
+.discount-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.discount-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.98) brightness(0.95);
+}
+
+.discount-card--tall {
+  grid-row: span 2;
+}
+
+.discount-card--small {
+  min-height: 200px;
+}
+
+.discount-copy-panel {
+  position: relative;
+  padding: 2rem;
+  border-radius: 2rem;
+  background: linear-gradient(180deg, rgba(10, 14, 22, 0.96), rgba(14, 18, 30, 0.96));
+  display: grid;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.discount-ribbon {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  width: 96px;
+  height: 96px;
+  background: linear-gradient(135deg, #ff4f5a, #ffb347);
+  border-radius: 1.2rem;
+  display: grid;
+  place-items: center;
+  transform: rotate(12deg);
+  box-shadow: 0 18px 38px rgba(255, 79, 90, 0.18);
+}
+
+.discount-ribbon span {
+  color: white;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.discount-eyebrow {
+  color: var(--primary-2);
+  font-size: 0.78rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.discount-copy-panel h2 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.02;
+}
+
+.discount-copy-panel p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.75;
+}
+
+.discount-pricing {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1.3rem 1.5rem;
+  border-radius: 1.6rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.original-price {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: line-through;
+  font-size: 0.95rem;
+}
+
+.current-price {
+  margin: 0;
+  color: #ff9f4c;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 900;
+}
+
+.discount-tag {
+  margin: 0;
+  color: #ffe082;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.discount-button {
+  padding: 1rem 2.2rem;
+  font-size: 0.95rem;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+@media (max-width: 980px) {
+  .discount-banner {
+    grid-template-columns: 1fr;
+  }
+
+  .discount-copy-panel {
+    order: 1;
+  }
+
+  .discount-collage {
+    order: 2;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1rem;
+  }
+
+  .discount-card--tall {
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 680px) {
+  .discount-banner {
+    padding: 1.5rem;
+  }
+
+  .discount-collage {
+    order: 2;
+    grid-template-columns: 1fr;
+  }
+
+  .discount-card--small {
+    min-height: 180px;
+  }
+
+  .discount-copy-panel {
+    order: 1;
+    padding: 1.5rem;
+  }
+}
+
+.gallery-main img {
+  width: 100%;
+  min-height: 320px;
+  object-fit: cover;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.gallery-thumbs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.gallery-thumb {
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.gallery-thumb.active {
+  border-color: var(--primary-2);
+  box-shadow: 0 0 0 1px rgba(242, 179, 109, 0.4);
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 90px;
+  object-fit: cover;
+}
+
 .topbar {
   display: flex;
   justify-content: space-between;

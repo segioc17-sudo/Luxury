@@ -5,16 +5,21 @@ import portadaGorras from './assets/products/gorras/Portadagorras.png';
 import portadaPantalones from './assets/products/pantalones/Portadapantalones.png';
 import portadaCamisas from './assets/products/camisas/Portadacamisas.png';
 import premiumImage from './assets/products/Premium.png';
+import gorra15aBg from './assets/products/gorras/Gorra 15.png';
+import gorra15bBg from './assets/products/gorras/Gorra 15b.png';
+import gorra15cBg from './assets/products/gorras/Gorra 15c.png';
 
-const currency = new Intl.NumberFormat('es-ES', {
+const currency = new Intl.NumberFormat('es-CO', {
   style: 'currency',
-  currency: 'USD'
+  currency: 'COP',
+  maximumFractionDigits: 0,
+  minimumFractionDigits: 0
 });
 
 function ProductCard({ product, addToCart }) {
   return (
     <article className="product-card fade-up">
-      <Link className="product-link" to={`/product/${product.id}`}>
+      <Link className="product-link" to={`/shop/product/${product.id}`}>
         <ProductImage image={product.image} alt={product.name} />
         <div className="product-copy">
           {!['gorras', 'pantalones', 'camisas'].includes(product.category) && (
@@ -62,6 +67,39 @@ function ProductImage({ image, alt, className }) {
   return <img src={src} alt={alt} className={className} loading="lazy" />;
 }
 
+function ProductGallery({ product, alt }) {
+  const images = product.gallery?.length ? product.gallery : [product.image];
+  const [selectedImage, setSelectedImage] = useState(images[0] || product.image);
+
+  useEffect(() => {
+    setSelectedImage(images[0] || product.image);
+  }, [images, product.id]);
+
+  if (!images.length) return null;
+
+  return (
+    <div className="product-gallery">
+      <div className="gallery-main">
+        <ProductImage image={selectedImage} alt={alt} />
+      </div>
+      {images.length > 1 && (
+        <div className="gallery-thumbs">
+          {images.map((image, index) => (
+            <button
+              key={`${image.file}-${index}`}
+              type="button"
+              className={`gallery-thumb ${selectedImage?.file === image.file ? 'active' : ''}`}
+              onClick={() => setSelectedImage(image)}
+            >
+              <ProductImage image={image} alt={`${alt} ${index + 1}`} />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function MobileCartSummary({ totalItems, totalPrice }) {
   if (!totalItems) return null;
   return (
@@ -70,7 +108,7 @@ function MobileCartSummary({ totalItems, totalPrice }) {
         <strong>{totalItems} artículos</strong>
         <span>{currency.format(totalPrice)}</span>
       </div>
-      <Link className="btn btn-primary" to="/cart">Ver carrito</Link>
+      <Link className="btn btn-primary" to="/shop/cart">Ver carrito</Link>
     </div>
   );
 }
@@ -152,7 +190,7 @@ function App() {
                   <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
-              <Link className={`nav-item cart-link ${totalItems > 0 ? 'filled' : ''}`} to="/cart" onClick={() => setMobileNavOpen(false)} aria-label="Ver carrito">
+              <Link className={`nav-item cart-link ${totalItems > 0 ? 'filled' : ''}`} to="/shop/cart" onClick={() => setMobileNavOpen(false)} aria-label="Ver carrito">
                 {totalItems === 0 ? (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden focusable="false">
                     <path d="M6 6h15l-1.5 9h-12z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
@@ -198,9 +236,9 @@ function App() {
               </button>
             </div>
             <nav className="mobile-nav-links">
-              <Link to="/camisas" onClick={() => setMobileNavOpen(false)}>Camisas</Link>
-              <Link to="/pantalones" onClick={() => setMobileNavOpen(false)}>Pantalones</Link>
-              <Link to="/gorras" onClick={() => setMobileNavOpen(false)}>Gorras</Link>
+              <Link to="/shop/camisas" onClick={() => setMobileNavOpen(false)}>Camisas</Link>
+              <Link to="/shop/pantalones" onClick={() => setMobileNavOpen(false)}>Pantalones</Link>
+              <Link to="/shop/gorras" onClick={() => setMobileNavOpen(false)}>Gorras</Link>
             </nav>
           </div>
         </>
@@ -214,8 +252,13 @@ function App() {
           <Route path="/gorras" element={<CategoryPage category="gorras" addToCart={addToCart} globalSearch={globalSearch} />} />
           <Route path="/pantalones" element={<CategoryPage category="pantalones" addToCart={addToCart} globalSearch={globalSearch} />} />
           <Route path="/camisas" element={<CategoryPage category="camisas" addToCart={addToCart} globalSearch={globalSearch} />} />
+          <Route path="/shop/gorras" element={<CategoryPage category="gorras" addToCart={addToCart} globalSearch={globalSearch} />} />
+          <Route path="/shop/pantalones" element={<CategoryPage category="pantalones" addToCart={addToCart} globalSearch={globalSearch} />} />
+          <Route path="/shop/camisas" element={<CategoryPage category="camisas" addToCart={addToCart} globalSearch={globalSearch} />} />
           <Route path="/product/:productId" element={<ProductDetail addToCart={addToCart} />} />
+          <Route path="/shop/product/:productId" element={<ProductDetail addToCart={addToCart} />} />
           <Route path="/cart" element={<CartPage cart={cart} products={products} totalPrice={totalPrice} updateQuantity={updateQuantity} clearCart={clearCart} />} />
+          <Route path="/shop/cart" element={<CartPage cart={cart} products={products} totalPrice={totalPrice} updateQuantity={updateQuantity} clearCart={clearCart} />} />
         </Routes>
         <MobileCartSummary totalItems={totalItems} totalPrice={totalPrice} />
       </main>
@@ -366,7 +409,7 @@ function Home({ addToCart }) {
           <p className="eyebrow">Insider drop</p>
           <h2>Suscríbete para acceso exclusivo a la siguiente colección</h2>
         </div>
-        <Link className="btn btn-secondary" to="/gorras">Únete ahora</Link>
+        <Link className="btn btn-secondary" to="/shop/gorras">Únete ahora</Link>
       </section>
 
       <section id="categories" className="categories">
@@ -375,21 +418,21 @@ function Home({ addToCart }) {
           <h2>Elige tu lenguaje de estilo</h2>
         </div>
         <div className="category-grid">
-          <Link className="category-card fade-up delay-1" to="/gorras">
+          <Link className="category-card fade-up delay-1" to="/shop/gorras">
             <img src={portadaGorras} alt="Gorras modernas" loading="lazy" />
             <div>
               <h3>Gorras</h3>
               <p>Caps premium con actitud de calle.</p>
             </div>
           </Link>
-          <Link className="category-card fade-up delay-2" to="/pantalones">
+          <Link className="category-card fade-up delay-2" to="/shop/pantalones">
             <img src={portadaPantalones} alt="Pantalones modernos" loading="lazy" />
             <div>
               <h3>Pantalones</h3>
               <p>Cortes refinados y confort de lujo.</p>
             </div>
           </Link>
-          <Link className="category-card fade-up delay-3" to="/camisas">
+          <Link className="category-card fade-up delay-3" to="/shop/camisas">
             <img src={portadaCamisas} alt="Camisas modernas" loading="lazy" />
             <div>
               <h3>Camisas</h3>
@@ -408,6 +451,36 @@ function Home({ addToCart }) {
           {featuredProducts.map((product) => (
             <ProductCard key={product.id} product={product} addToCart={addToCart} />
           ))}
+        </div>
+      </section>
+
+      <section className="discount-banner fade-up">
+        <div className="discount-collage">
+          <div className="discount-card discount-card--tall">
+            <img src={gorra15aBg} alt="Gorra 15" />
+          </div>
+          <div className="discount-card discount-card--small">
+            <img src={gorra15bBg} alt="Gorra 15b" />
+          </div>
+          <div className="discount-card discount-card--small">
+            <img src={gorra15cBg} alt="Gorra 15c" />
+          </div>
+        </div>
+        <div className="discount-copy-panel">
+          <div className="discount-ribbon">
+            <span>% OFF</span>
+          </div>
+          <p className="eyebrow discount-eyebrow">Oferta exclusiva limitada</p>
+          <h2>New York Yankees X2</h2>
+          <p>Pack premium 2x con descuento exclusivo. Lleva el precio real desde $150.000 a $100.000.</p>
+          <div className="discount-pricing">
+            <p className="original-price">$ 150.000</p>
+            <p className="current-price">$ 100.000</p>
+            <p className="discount-tag">Ahorra 33%</p>
+          </div>
+          <Link className="btn btn-primary discount-button" to="/shop/product/23#galeria">
+            Ver fotos
+          </Link>
         </div>
       </section>
 
@@ -473,7 +546,7 @@ function Home({ addToCart }) {
 
 function CategoryPage({ category, addToCart, globalSearch }) {
   const [selectedCategory, setSelectedCategory] = useState(category);
-  const [maxPrice, setMaxPrice] = useState(200);
+  const [maxPrice, setMaxPrice] = useState(250000);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOption, setSortOption] = useState('relevant');
   const [activeTag, setActiveTag] = useState('all');
@@ -551,8 +624,8 @@ function CategoryPage({ category, addToCart, globalSearch }) {
             />
           </label>
           <label className="price-filter">
-            <span>Precio hasta ${maxPrice}</span>
-            <input type="range" min="40" max="120" value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} />
+            <span>Precio hasta {currency.format(maxPrice)}</span>
+            <input type="range" min="30000" max="250000" value={maxPrice} onChange={(event) => setMaxPrice(Number(event.target.value))} />
           </label>
           <select value={sortOption} onChange={(event) => setSortOption(event.target.value)}>
             <option value="relevant">Más relevantes</option>
@@ -593,7 +666,17 @@ function CategoryPage({ category, addToCart, globalSearch }) {
 
 function ProductDetail({ addToCart }) {
   const { productId } = useParams();
+  const location = useLocation();
   const product = products.find((item) => item.id === Number(productId));
+
+  useEffect(() => {
+    if (!location.hash) return;
+    const id = location.hash.replace('#', '');
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [location.hash]);
 
   if (!product) {
     return (
@@ -629,8 +712,8 @@ function ProductDetail({ addToCart }) {
             <Link className="btn btn-secondary" to={`/${product.category}`}>Ver colección</Link>
           </div>
         </div>
-        <div className="detail-image">
-          <ProductImage image={product.image} alt={product.name} />
+        <div className="detail-image" id="galeria">
+          <ProductGallery product={product} alt={product.name} />
         </div>
       </div>
 
