@@ -16,7 +16,9 @@ const currency = new Intl.NumberFormat('es-CO', {
   minimumFractionDigits: 0
 });
 
-function ProductCard({ product, addToCart }) {
+function ProductCard({ product, addToCart, inCart }) {
+  const alreadyInCart = !!inCart;
+
   return (
     <article className="product-card fade-up">
       <Link className="product-link" to={`/shop/product/${product.id}`}>
@@ -36,7 +38,9 @@ function ProductCard({ product, addToCart }) {
       <div className="product-meta">
         <span className="price">{currency.format(product.price)}</span>
         {product.inStock ? (
-          <button onClick={() => addToCart(product.id)}>Agregar</button>
+          <button onClick={() => addToCart(product.id)} disabled={alreadyInCart}>
+            {alreadyInCart ? 'Agregado' : 'Agregar'}
+          </button>
         ) : (
           <button className="btn-disabled" disabled>Agotado</button>
         )}
@@ -101,7 +105,11 @@ function ProductGallery({ product, alt }) {
 }
 
 function MobileCartSummary({ totalItems, totalPrice }) {
-  if (!totalItems) return null;
+  const location = useLocation();
+  const hideOnCart = location.pathname === '/cart' || location.pathname === '/shop/cart';
+
+  if (!totalItems || hideOnCart) return null;
+
   return (
     <div className="mobile-cart-bar fade-up">
       <div>
@@ -140,7 +148,7 @@ function App() {
     setCart((prev) => {
       const existing = prev.find((item) => item.id === productId);
       if (existing) {
-        return prev.map((item) => (item.id === productId ? { ...item, quantity: item.quantity + 1 } : item));
+        return prev;
       }
       return [...prev, { id: productId, quantity: 1 }];
     });
@@ -150,6 +158,9 @@ function App() {
     setCart((prev) =>
       prev.flatMap((item) => {
         if (item.id !== productId) return [item];
+        if (change > 0) {
+          return item.quantity >= 1 ? [item] : [{ ...item, quantity: item.quantity + change }];
+        }
         const nextQuantity = item.quantity + change;
         return nextQuantity > 0 ? [{ ...item, quantity: nextQuantity }] : [];
       })
@@ -171,6 +182,7 @@ function App() {
 
   const location = useLocation();
   const showHeader = location.pathname !== '/' && location.pathname !== '/launch';
+  const hideMobileCartSummary = location.pathname === '/cart' || location.pathname === '/shop/cart';
 
   return (
     <>
@@ -247,16 +259,16 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/home" element={<Home addToCart={addToCart} openMemberModal={openMemberModal} />} />
+          <Route path="/home" element={<Home addToCart={addToCart} cart={cart} openMemberModal={openMemberModal} />} />
           <Route path="/launch" element={<LandingPage />} />
-          <Route path="/gorras" element={<CategoryPage category="gorras" addToCart={addToCart} globalSearch={globalSearch} />} />
-          <Route path="/pantalones" element={<CategoryPage category="pantalones" addToCart={addToCart} globalSearch={globalSearch} />} />
-          <Route path="/camisas" element={<CategoryPage category="camisas" addToCart={addToCart} globalSearch={globalSearch} />} />
-          <Route path="/shop/gorras" element={<CategoryPage category="gorras" addToCart={addToCart} globalSearch={globalSearch} />} />
-          <Route path="/shop/pantalones" element={<CategoryPage category="pantalones" addToCart={addToCart} globalSearch={globalSearch} />} />
-          <Route path="/shop/camisas" element={<CategoryPage category="camisas" addToCart={addToCart} globalSearch={globalSearch} />} />
-          <Route path="/product/:productId" element={<ProductDetail addToCart={addToCart} />} />
-          <Route path="/shop/product/:productId" element={<ProductDetail addToCart={addToCart} />} />
+          <Route path="/gorras" element={<CategoryPage category="gorras" addToCart={addToCart} cart={cart} globalSearch={globalSearch} />} />
+          <Route path="/pantalones" element={<CategoryPage category="pantalones" addToCart={addToCart} cart={cart} globalSearch={globalSearch} />} />
+          <Route path="/camisas" element={<CategoryPage category="camisas" addToCart={addToCart} cart={cart} globalSearch={globalSearch} />} />
+          <Route path="/shop/gorras" element={<CategoryPage category="gorras" addToCart={addToCart} cart={cart} globalSearch={globalSearch} />} />
+          <Route path="/shop/pantalones" element={<CategoryPage category="pantalones" addToCart={addToCart} cart={cart} globalSearch={globalSearch} />} />
+          <Route path="/shop/camisas" element={<CategoryPage category="camisas" addToCart={addToCart} cart={cart} globalSearch={globalSearch} />} />
+          <Route path="/product/:productId" element={<ProductDetail addToCart={addToCart} cart={cart} />} />
+          <Route path="/shop/product/:productId" element={<ProductDetail addToCart={addToCart} cart={cart} />} />
           <Route path="/cart" element={<CartPage cart={cart} products={products} totalPrice={totalPrice} updateQuantity={updateQuantity} clearCart={clearCart} />} />
           <Route path="/shop/cart" element={<CartPage cart={cart} products={products} totalPrice={totalPrice} updateQuantity={updateQuantity} clearCart={clearCart} />} />
         </Routes>
@@ -339,7 +351,7 @@ function LandingPage() {
   );
 }
 
-function Home({ addToCart }) {
+function Home({ addToCart, cart }) {
   const [selectedLookImage, setSelectedLookImage] = useState(null);
 
   const lookbookItems = [
@@ -449,7 +461,7 @@ function Home({ addToCart }) {
         </div>
         <div className="products-grid">
           {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} addToCart={addToCart} />
+            <ProductCard key={product.id} product={product} addToCart={addToCart} inCart={cart.some((item) => item.id === product.id)} />
           ))}
         </div>
       </section>
@@ -544,7 +556,7 @@ function Home({ addToCart }) {
   );
 }
 
-function CategoryPage({ category, addToCart, globalSearch }) {
+function CategoryPage({ category, addToCart, globalSearch, cart }) {
   const [selectedCategory, setSelectedCategory] = useState(category);
   const [maxPrice, setMaxPrice] = useState(250000);
   const [searchTerm, setSearchTerm] = useState('');
@@ -656,7 +668,7 @@ function CategoryPage({ category, addToCart, globalSearch }) {
       ) : (
         <div className="products-grid">
           {filtered.map((product) => (
-            <ProductCard key={product.id} product={product} addToCart={addToCart} />
+            <ProductCard key={product.id} product={product} addToCart={addToCart} inCart={cart.some((item) => item.id === product.id)} />
           ))}
         </div>
       )}
@@ -664,7 +676,7 @@ function CategoryPage({ category, addToCart, globalSearch }) {
   );
 }
 
-function ProductDetail({ addToCart }) {
+function ProductDetail({ addToCart, cart }) {
   const { productId } = useParams();
   const location = useLocation();
   const product = products.find((item) => item.id === Number(productId));
@@ -703,11 +715,11 @@ function ProductDetail({ addToCart }) {
           </div>
           <div className="detail-actions">
             <button
-              disabled={!product.inStock}
+              disabled={!product.inStock || cart.some((entry) => entry.id === product.id)}
               onClick={() => addToCart(product.id)}
               className="btn btn-primary"
             >
-              {product.inStock ? 'Agregar al carrito' : 'Producto agotado'}
+              {cart.some((entry) => entry.id === product.id) ? 'Agregado' : product.inStock ? 'Agregar al carrito' : 'Producto agotado'}
             </button>
             <Link className="btn btn-secondary" to={`/${product.category}`}>Ver colección</Link>
           </div>
@@ -725,7 +737,7 @@ function ProductDetail({ addToCart }) {
           </div>
           <div className="products-grid">
             {related.map((item) => (
-              <ProductCard key={item.id} product={item} addToCart={addToCart} />
+              <ProductCard key={item.id} product={item} addToCart={addToCart} inCart={cart.some((entry) => entry.id === item.id)} />
             ))}
           </div>
         </div>
@@ -783,7 +795,7 @@ function CartPage({ cart, products, totalPrice, updateQuantity, clearCart }) {
                     <div className="quantity-controls">
                       <button type="button" onClick={() => updateQuantity(product.id, -1)}>-</button>
                       <span>{entry.quantity}</span>
-                      <button type="button" onClick={() => updateQuantity(product.id, 1)}>+</button>
+                      <button type="button" onClick={() => updateQuantity(product.id, 1)} disabled={entry.quantity >= 1}>+</button>
                     </div>
                   </div>
                   <div>
@@ -803,7 +815,7 @@ function CartPage({ cart, products, totalPrice, updateQuantity, clearCart }) {
             <p>Entrega en 24-48 h</p>
           </div>
 
-          <form className="checkout-form" onSubmit={handleSubmit}>
+          <form id="checkout-form" className="checkout-form" onSubmit={handleSubmit}>
             <input
               type="text"
               placeholder="Tu nombre"
@@ -826,6 +838,12 @@ function CartPage({ cart, products, totalPrice, updateQuantity, clearCart }) {
             />
             <button type="submit">Finalizar compra</button>
           </form>
+          {cart.length > 0 && (
+            <div className="mobile-checkout-bar">
+              <span>Total {currency.format(totalPrice)}</span>
+              <button type="submit" form="checkout-form">Finalizar compra</button>
+            </div>
+          )}
         </div>
       </div>
     </section>
